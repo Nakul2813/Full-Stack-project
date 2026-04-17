@@ -1,15 +1,90 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const path = require('path');
+const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
+const Inquiry = require('./models/Inquiry');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ── Email transporter ─────────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+const NOTIFY_EMAILS = (process.env.NOTIFY_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+
+async function sendNotificationEmail(inquiry) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || NOTIFY_EMAILS.length === 0) {
+    console.log('⚠️  Email not configured — skipping notification.');
+    return;
+  }
+  try {
+    // Email to business owners
+    await transporter.sendMail({
+      from: `"R B Constructions" <${process.env.EMAIL_USER}>`,
+      to: NOTIFY_EMAILS.join(', '),
+      subject: `🏗️ New Inquiry: ${inquiry.service || 'General'} — ${inquiry.name}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden">
+          <div style="background:#1A1D24;padding:24px 28px">
+            <h2 style="color:#C8A84B;margin:0;font-size:20px">🏗️ New Client Inquiry</h2>
+            <p style="color:#9A9FA8;margin:4px 0 0;font-size:13px">${new Date(inquiry.createdAt).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' })}</p>
+          </div>
+          <div style="padding:24px 28px;background:#fff">
+            <table style="width:100%;border-collapse:collapse">
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;color:#999;width:120px">Name</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-weight:600">${inquiry.name}</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;color:#999">Phone</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0"><a href="tel:${inquiry.phone}" style="color:#1a73e8">${inquiry.phone}</a></td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;color:#999">Email</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0">${inquiry.email || '—'}</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;color:#999">Service</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;color:#C8A84B;font-weight:600">${inquiry.service || '—'}</td></tr>
+              <tr><td style="padding:10px 0;color:#999">Message</td><td style="padding:10px 0">${inquiry.message}</td></tr>
+            </table>
+          </div>
+          <div style="background:#f7f6f3;padding:14px 28px;font-size:12px;color:#999">
+            This inquiry was submitted via the R B Constructions website. Reply to the client within 24 hours.
+          </div>
+        </div>`
+    });
+    console.log('📧 Notification email sent to:', NOTIFY_EMAILS.join(', '));
+
+    // Auto-reply to client (if they provided an email)
+    if (inquiry.email) {
+      await transporter.sendMail({
+        from: `"R B Constructions" <${process.env.EMAIL_USER}>`,
+        to: inquiry.email,
+        subject: 'Thank you for your inquiry — R B Constructions',
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden">
+            <div style="background:#1A1D24;padding:24px 28px">
+              <h2 style="color:#C8A84B;margin:0;font-size:20px">R B Constructions</h2>
+              <p style="color:#C8A84B;margin:4px 0 0;font-size:11px;letter-spacing:2px">BUILDING EXCELLENCE</p>
+            </div>
+            <div style="padding:28px;background:#fff;color:#333;line-height:1.7">
+              <p>Dear <strong>${inquiry.name}</strong>,</p>
+              <p>Thank you for reaching out to R B Constructions! We have received your inquiry regarding <strong>${inquiry.service || 'our services'}</strong>.</p>
+              <p>Our team will review your request and get back to you within <strong>24 hours</strong>. If you need immediate assistance, please call us:</p>
+              <p style="font-size:16px;font-weight:600">📞 +91 77809 88600 &nbsp;|&nbsp; +91 95411 82006</p>
+              <p style="margin-top:24px">Warm regards,<br><strong>R B Constructions Team</strong><br>Lakhanpur, Kathua, J&K – 184152</p>
+            </div>
+          </div>`
+      });
+      console.log('📧 Auto-reply sent to client:', inquiry.email);
+    }
+  } catch (err) {
+    console.error('❌ Email sending failed:', err.message);
+  }
+}
+
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -79,7 +154,7 @@ const inventory = [
   { id: 24, category: 'Finishing Materials', name: 'Waterproofing Compound', unit: 'Liter', price: 180, stock: 500, sku: 'FM-004' },
 ];
 
-const inquiries = [];
+// inquiries are now stored in MongoDB via the Inquiry model
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 
@@ -98,21 +173,106 @@ app.get('/api/inventory', (req, res) => {
   res.json({ success: true, data, categories });
 });
 
-app.post('/api/inquiry', (req, res) => {
+app.post('/api/inquiry', async (req, res) => {
   const { name, phone, email, service, message } = req.body;
   if (!name || !phone || !message) return res.status(400).json({ success: false, message: 'Name, phone and message are required.' });
-  const inquiry = { id: inquiries.length + 1, name, phone, email, service, message, createdAt: new Date().toISOString() };
-  inquiries.push(inquiry);
-  console.log('New inquiry:', inquiry);
-  res.json({ success: true, message: 'Inquiry submitted successfully! We will contact you within 24 hours.', data: inquiry });
+  try {
+    const inquiry = await Inquiry.create({ name, phone, email, service, message });
+    console.log('✅ New inquiry saved to DB:', { id: inquiry._id, name, phone, service });
+    // Send email notification (non-blocking — don't wait for it)
+    sendNotificationEmail(inquiry);
+    res.json({ success: true, message: 'Inquiry submitted successfully! We will contact you within 24 hours.', data: inquiry });
+  } catch (err) {
+    console.error('❌ Failed to save inquiry:', err.message);
+    res.status(500).json({ success: false, message: 'Something went wrong. Please call us at +91 77809 88600.' });
+  }
 });
+
+
 
 app.get('/api/stats', (req, res) => res.json({
   success: true,
   data: { projects: 150, clients: 80, experience: 12, vehicles: vehicles.length }
 }));
 
-// ── Serve frontend ────────────────────────────────────────────────────────────
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// ── Admin API Routes ──────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_TOKEN = Buffer.from(ADMIN_PASSWORD + ':' + Date.now()).toString('base64');
+let adminToken = ADMIN_TOKEN; // Simple token — regenerated on each server restart
 
-app.listen(PORT, () => console.log(`🏗️  R B Constructions server running on http://localhost:${PORT}`));
+function authAdmin(req, res, next) {
+  const token = (req.headers.authorization || '').replace('Bearer ', '');
+  if (token !== adminToken) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  next();
+}
+
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === ADMIN_PASSWORD) {
+    res.json({ success: true, token: adminToken });
+  } else {
+    res.status(401).json({ success: false, message: 'Incorrect password.' });
+  }
+});
+
+// Protected: Get all inquiries
+app.get('/api/inquiries', authAdmin, async (req, res) => {
+  try {
+    const data = await Inquiry.find().sort({ createdAt: -1 });
+    res.json({ success: true, count: data.length, data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch inquiries.' });
+  }
+});
+
+// Protected: Update inquiry status
+app.patch('/api/admin/inquiries/:id', authAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['new', 'contacted', 'closed'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status.' });
+    }
+    const inquiry = await Inquiry.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!inquiry) return res.status(404).json({ success: false, message: 'Inquiry not found.' });
+    console.log(`📝 Inquiry ${inquiry._id} status → ${status}`);
+    res.json({ success: true, data: inquiry });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update inquiry.' });
+  }
+});
+
+// Protected: Delete inquiry
+app.delete('/api/admin/inquiries/:id', authAdmin, async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findByIdAndDelete(req.params.id);
+    if (!inquiry) return res.status(404).json({ success: false, message: 'Inquiry not found.' });
+    console.log(`🗑️  Inquiry ${inquiry._id} deleted`);
+    res.json({ success: true, message: 'Inquiry deleted.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete inquiry.' });
+  }
+});
+
+// ── Serve frontend ────────────────────────────────────────────────────────────
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/{*splat}', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// ── Start server with MongoDB connection ──────────────────────────────────────
+const MONGO_URI = process.env.MONGODB_URI;
+
+if (MONGO_URI && !MONGO_URI.includes('YOUR_')) {
+  mongoose.connect(MONGO_URI)
+    .then(() => {
+      console.log('✅ Connected to MongoDB Atlas');
+      app.listen(PORT, () => console.log(`🏗️  R B Constructions server running on http://localhost:${PORT}`));
+    })
+    .catch(err => {
+      console.error('❌ MongoDB connection failed:', err.message);
+      console.log('⚠️  Starting server without database — inquiries will NOT be saved.');
+      app.listen(PORT, () => console.log(`🏗️  R B Constructions server running on http://localhost:${PORT} (NO DATABASE)`));
+    });
+} else {
+  console.log('⚠️  MONGODB_URI not set in .env — starting without database.');
+  console.log('   Inquiries will only print to console and will NOT be saved.');
+  app.listen(PORT, () => console.log(`🏗️  R B Constructions server running on http://localhost:${PORT} (NO DATABASE)`));
+}

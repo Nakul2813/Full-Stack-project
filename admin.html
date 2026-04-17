@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – R B Constructions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark">RB</div>
+      <div>
+        <div class="login-brand">R B Constructions</div>
+        <div class="login-sub">Admin Dashboard</div>
+      </div>
+    </div>
+    <form id="loginForm">
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="Enter admin password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="login-btn">Login →</button>
+      <div id="loginError" class="login-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">RB</div>
+      <div>
+        <div class="sidebar-brand">R B Constructions</div>
+        <div class="sidebar-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" data-tab="overview">📊 Overview</a>
+      <a href="#" class="sidebar-link" data-tab="inquiries">📩 Inquiries</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/" class="sidebar-link">← Back to Website</a>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="dash-header">
+      <div>
+        <h1 class="dash-title" id="dashTitle">Overview</h1>
+        <p class="dash-subtitle" id="dashSubtitle">Welcome back, Admin</p>
+      </div>
+      <div class="dash-actions">
+        <button class="action-btn" id="refreshBtn" title="Refresh">🔄 Refresh</button>
+        <button class="action-btn export" id="exportBtn" title="Export CSV">📥 Export CSV</button>
+      </div>
+    </header>
+
+    <!-- Overview Tab -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-card-icon">📩</div>
+          <div class="stat-card-value" id="statTotal">0</div>
+          <div class="stat-card-label">Total Inquiries</div>
+        </div>
+        <div class="stat-card new">
+          <div class="stat-card-icon">🆕</div>
+          <div class="stat-card-value" id="statNew">0</div>
+          <div class="stat-card-label">New (Unread)</div>
+        </div>
+        <div class="stat-card contacted">
+          <div class="stat-card-icon">📞</div>
+          <div class="stat-card-value" id="statContacted">0</div>
+          <div class="stat-card-label">Contacted</div>
+        </div>
+        <div class="stat-card closed">
+          <div class="stat-card-icon">✅</div>
+          <div class="stat-card-value" id="statClosed">0</div>
+          <div class="stat-card-label">Closed</div>
+        </div>
+      </div>
+
+      <div class="recent-section">
+        <h3>Recent Inquiries</h3>
+        <div class="table-wrap">
+          <table class="admin-table" id="recentTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Service</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inquiries Tab -->
+    <div class="tab-content" id="tab-inquiries">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" id="searchInput" placeholder="Search by name, phone, service..." />
+        </div>
+        <div class="filter-btns">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="new">New</button>
+          <button class="filter-btn" data-filter="contacted">Contacted</button>
+          <button class="filter-btn" data-filter="closed">Closed</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table full" id="inquiriesTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Service</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inquiriesBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer" id="tableFooter"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Inquiry Detail Modal -->
+<div class="admin-modal-overlay" id="detailOverlay">
+  <div class="admin-modal">
+    <button class="admin-modal-close" id="detailClose">✕</button>
+    <h3 id="detailTitle"></h3>
+    <div class="detail-grid" id="detailGrid"></div>
+    <div class="detail-message" id="detailMessage"></div>
+    <div class="detail-actions" id="detailActions"></div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

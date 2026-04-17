@@ -79,48 +79,54 @@
       <p class="section-desc">From groundbreaking to finishing, we deliver turnkey construction services across Jammu & Kashmir.</p>
     </div>
     <div class="services-grid">
-      <div class="service-card">
+      <div class="service-card" data-service="building">
         <div class="service-icon">
           <svg viewBox="0 0 48 48" fill="none"><rect x="4" y="28" width="40" height="16" rx="2" fill="currentColor" opacity=".15"/><rect x="8" y="20" width="32" height="10" rx="1" fill="currentColor" opacity=".3"/><rect x="16" y="8" width="16" height="14" rx="1" fill="currentColor" opacity=".5"/><rect x="20" y="4" width="8" height="6" rx="1" fill="currentColor"/></svg>
         </div>
         <h3>Building Construction</h3>
         <p>Residential, commercial and industrial construction with superior quality and timely delivery across Kathua and surrounding districts.</p>
+        <span class="service-cta">Learn More →</span>
       </div>
-      <div class="service-card featured">
+      <div class="service-card featured" data-service="vehicle">
         <div class="service-badge">Most Popular</div>
         <div class="service-icon">
           <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="18" fill="currentColor" opacity=".1"/><path d="M14 24c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="24" r="4" fill="currentColor"/><path d="M24 8v4M24 36v4M8 24h4M36 24h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
         <h3>Heavy Vehicle Rental</h3>
         <p>Premium fleet of transit mixers, bulkers, and excavators available on rent with experienced operators.</p>
+        <span class="service-cta">Learn More →</span>
       </div>
-      <div class="service-card">
+      <div class="service-card" data-service="road">
         <div class="service-icon">
           <svg viewBox="0 0 48 48" fill="none"><path d="M6 42h36M10 42V22l14-14 14 14v20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="19" y="30" width="10" height="12" rx="1" fill="currentColor" opacity=".3"/><path d="M18 26h12M18 22h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/></svg>
         </div>
         <h3>Road & Infrastructure</h3>
         <p>Road construction, drainage systems, retaining walls and civil infrastructure projects with proven expertise.</p>
+        <span class="service-cta">Learn More →</span>
       </div>
-      <div class="service-card">
+      <div class="service-card" data-service="material">
         <div class="service-icon">
           <svg viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="36" height="36" rx="3" fill="currentColor" opacity=".1"/><path d="M16 20h16M16 24h10M16 28h13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="10" y="12" width="8" height="8" rx="1" fill="currentColor" opacity=".4"/></svg>
         </div>
         <h3>Material Supply</h3>
         <p>Quality construction materials sourced and delivered to your site — cement, steel, aggregate, bricks and finishing materials.</p>
+        <span class="service-cta">Learn More →</span>
       </div>
-      <div class="service-card">
+      <div class="service-card" data-service="project">
         <div class="service-icon">
           <svg viewBox="0 0 48 48" fill="none"><path d="M24 6L6 16v20l18 6 18-6V16L24 6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="currentColor" opacity=".1"/><path d="M24 6v26M6 16l18 10 18-10" stroke="currentColor" stroke-width="2"/></svg>
         </div>
         <h3>Project Management</h3>
         <p>End-to-end project management from design coordination, budgeting and procurement to execution and handover.</p>
+        <span class="service-cta">Learn More →</span>
       </div>
-      <div class="service-card">
+      <div class="service-card" data-service="labour">
         <div class="service-icon">
           <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="18" r="8" fill="currentColor" opacity=".2"/><path d="M24 10v16M16 14l8 4 8-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 38c0-7.7 6.3-14 14-14s14 6.3 14 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
         </div>
         <h3>Skilled Labour</h3>
         <p>Trained masons, carpenters, electricians, and supervisors available for deployment on your construction project.</p>
+        <span class="service-cta">Learn More →</span>
       </div>
     </div>
   </div>
@@ -254,6 +260,7 @@
             <div class="ci-details">
               <span class="ci-label">Email Address</span>
               <a href="mailto:RBconstructions@gmail.com" class="ci-value">RBconstructions@gmail.com</a>
+              <a href="mailto:business.aus666@gmail.com" class="ci-value">business.aus666@gmail.com</a>
             </div>
           </div>
           <div class="contact-item">
@@ -359,6 +366,7 @@
         <a href="tel:+917780988600">📞 +91 77809 88600</a>
         <a href="tel:+919541182006">📞 +91 95411 82006</a>
         <a href="mailto:RBconstructions@gmail.com">✉️ RBconstructions@gmail.com</a>
+        <a href="mailto:business.aus666@gmail.com">✉️ business.aus666@gmail.com</a>
         <span>📍 Lakhanpur, Kathua, J&K – 184152</span>
       </div>
     </div>
@@ -386,6 +394,41 @@
   </div>
 </div>
  
+<!-- Service Detail Modal -->
+<div class="svc-modal-overlay" id="svcModalOverlay">
+  <div class="svc-modal" id="svcModal">
+    <button class="svc-modal-close" id="svcModalClose">✕</button>
+    <div class="svc-modal-header">
+      <div class="svc-modal-icon" id="svcModalIcon"></div>
+      <div>
+        <h2 class="svc-modal-title" id="svcModalTitle"></h2>
+        <p class="svc-modal-subtitle" id="svcModalSubtitle"></p>
+      </div>
+    </div>
+    <div class="svc-modal-body" id="svcModalBody">
+      <div class="svc-description" id="svcDesc"></div>
+      <div class="svc-pricing-section">
+        <h4>💰 Pricing</h4>
+        <div class="svc-pricing-grid" id="svcPricing"></div>
+      </div>
+      <div class="svc-features-section">
+        <h4>✅ What's Included</h4>
+        <div class="svc-features-grid" id="svcFeatures"></div>
+      </div>
+      <div class="svc-process-section">
+        <h4>📋 Our Process</h4>
+        <div class="svc-process-list" id="svcProcess"></div>
+      </div>
+      <div class="svc-cta-bar">
+        <p>Interested in this service? Get a free consultation and quote.</p>
+        <button class="btn-primary" id="svcCtaBtn" onclick="openModal(document.getElementById('svcModalTitle').textContent, 'Fill the form below and our team will get back to you within 24 hours.', document.getElementById('svcModalTitle').textContent); document.getElementById('svcModalOverlay').classList.remove('open');">
+          Get Free Quote ↗
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="scroll-top" id="scrollTop" title="Back to top">↑</div>
  
 <script src="main.js"></script>
