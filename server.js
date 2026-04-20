@@ -1,7 +1,7 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const Inquiry = require('./models/Inquiry');
@@ -196,9 +196,14 @@ app.get('/api/stats', (req, res) => res.json({
 }));
 
 // ── Admin API Routes ──────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || 'admin123').trim();
+console.log('⚙️  ADMIN_PASSWORD loaded from .env:', Boolean(ADMIN_PASSWORD));
 const ADMIN_TOKEN = Buffer.from(ADMIN_PASSWORD + ':' + Date.now()).toString('base64');
 let adminToken = ADMIN_TOKEN; // Simple token — regenerated on each server restart
+
+function normalizeAdminPassword(value) {
+  return String(value || '').trim().replace(/^["']|["']$/g, '');
+}
 
 function authAdmin(req, res, next) {
   const token = (req.headers.authorization || '').replace('Bearer ', '');
@@ -207,10 +212,15 @@ function authAdmin(req, res, next) {
 }
 
 app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-  if (password === ADMIN_PASSWORD) {
+  const password = normalizeAdminPassword(req.body?.password);
+  const expectedPassword = normalizeAdminPassword(ADMIN_PASSWORD);
+  if (password === expectedPassword) {
     res.json({ success: true, token: adminToken });
   } else {
+    console.warn('⚠️  Admin login failed:', {
+      receivedLength: password.length,
+      expectedLength: expectedPassword.length
+    });
     res.status(401).json({ success: false, message: 'Incorrect password.' });
   }
 });
