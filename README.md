@@ -46,5 +46,5 @@ npm run dev
 
 ## Contact Details
 - 📞 +91 77809 88600 / +91 95411 82006
-- ✉️ RBconstructions@gmail.com
+- ✉️ RBconstructions2025@gmail.com
 - 📍 Lakhanpur, Kathua, Jammu & Kashmir – 184152
